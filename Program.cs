@@ -1,5 +1,6 @@
-﻿const int THREAD_NUMBERS = 2; //число потоков
-const int N = 10; //размер массива
+﻿const int THREAD_NUMBERS = 8; //число потоков
+const int N = 100_000; //размер массива
+object locker = new object();
 
 //Печать массива в консоль
 void PrintArrayToConsole(int[] printArray)
@@ -89,6 +90,19 @@ void ParallelSortExtended(int[] inputArray, int[] counters, int startPos, int en
     }
 }
 
+//Сравнение двух массивов на тождественность
+bool EqualityMatrix(int[] fmatrix, int[] smatrix)
+{
+    bool res = true;
+
+    for (int i = 0; i < N; i++)
+    {
+        res = res && (fmatrix[i] == smatrix[i]);
+    }
+
+    return res;
+}
+
 Random rand = new Random();
 int[] array = new int[N].Select(r => rand.Next(0, 10)).ToArray();
 Console.WriteLine("Изначальный массив готов.");
@@ -103,3 +117,5 @@ Console.WriteLine("Сортировка одним потоком готова")
 Array.Copy(array, resParallel, N);
 PrepareParallelSorting(resParallel);
 Console.WriteLine("Сортировка несколькими потоками готова.");
+
+Console.WriteLine($"Массивы равны? {EqualityMatrix(resSerial, resParallel)}");
