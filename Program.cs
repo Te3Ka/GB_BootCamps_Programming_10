@@ -1,5 +1,5 @@
 ﻿const int THREAD_NUMBERS = 2; //число потоков
-const int N = 10; //размер массива
+const int N = 100_000; //размер массива
 
 //Печать массива в консоль
 void PrintArrayToConsole(int[] printArray)
@@ -15,7 +15,8 @@ void PrintArrayToConsole(int[] printArray)
     Console.Write("]");
 }
 
-int[] CountingSortExtended(int[] inputArray)
+//Сортировка одним потоком
+void CountingSortExtended(int[] inputArray)
 {
     int max = inputArray.Max();
     int min = inputArray.Min();
@@ -42,20 +43,57 @@ int[] CountingSortExtended(int[] inputArray)
     return sortedArray;
 }
 
+//Подготовка к параллельной сортировке
+void PrepareParallelSorting(int[] inputArray)
+{
+    int max = inputArray.Max();
+    int min = inputArray.Min();
+
+    int offset = -min;
+    int[] counters = new int[max + offset + 1];
+
+    int eachThreadCalc = N / THREAD_NUMBERS;
+    var threadsList = new List<Thread>();
+
+    for (int i = 0; i < THREAD_NUMBERS; i++)
+    {
+        int startPos = i * eachThreadCalc;
+        int endPos = (i + 1) * eachThreadCalc;
+        if (i == THREAD_NUMBERS - 1) endPos = N;
+        
+        threadsList.Add(new Thread(() => ParallelSortExtended(inputArray, counters, startPos, endPos, offset)));
+    	threadsList[i].Start();
+    }
+
+    foreach(var thread in threadsList)
+    {
+    	thread.Join();
+    }
+}
+
+
+//Сортировка несколькими потоками
+void ParallelSortExtended(int[] inputArray, int[] counters, int startPos, int endPos, int offset)
+{
+    int[] sortedArray = new int[endPos];
+
+    for (int i = startPos; i < endPos; i++)
+    {
+        counters[inputArray[i] + offset]++;
+    }
+}
 
 Random rand = new Random();
 int[] array = new int[N].Select(r => rand.Next(0, 10)).ToArray();
-Console.WriteLine("Изначальный массив:");
-PrintArrayToConsole(array);
-Console.WriteLine();
-int[] arraySort = CountingSortExtended(array);
-Console.WriteLine("Сортированный массив");
-PrintArrayToConsole(arraySort);
+Console.WriteLine("Изначальный массив готов.");
 
-/*
 int[] resSerial = new int[N];
 int[] resParallel = new int[N];
 
 Array.Copy(array, resSerial, N);
+CountingSortExtended(resSerial);
+Console.WriteLine("Сортировка одним потоком готова");
+
 Array.Copy(array, resParallel, N);
-*/
+PrepareParallelSorting(resParallel);
+Console.WriteLine("Сортировка несколькими потоками готова.");
