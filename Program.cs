@@ -59,14 +59,14 @@ void PrepareParallelSorting(int[] inputArray)
         int startPos = i * eachThreadCalc;
         int endPos = (i + 1) * eachThreadCalc;
         if (i == THREAD_NUMBERS - 1) endPos = N;
-        
+
         threadsList.Add(new Thread(() => ParallelSortExtended(inputArray, counters, startPos, endPos, offset)));
-    	threadsList[i].Start();
+        threadsList[i].Start();
     }
 
-    foreach(var thread in threadsList)
+    foreach (var thread in threadsList)
     {
-    	thread.Join();
+        thread.Join();
     }
 
     int index = 0;
@@ -86,7 +86,10 @@ void ParallelSortExtended(int[] inputArray, int[] counters, int startPos, int en
 {
     for (int i = startPos; i < endPos; i++)
     {
-        counters[inputArray[i] + offset]++;
+        lock (locker)
+        {
+            counters[inputArray[i] + offset]++;
+        }
     }
 }
 
