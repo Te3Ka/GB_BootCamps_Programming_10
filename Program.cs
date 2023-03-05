@@ -1,5 +1,5 @@
 ﻿const int THREAD_NUMBERS = 2; //число потоков
-const int N = 100_000; //размер массива
+const int N = 10; //размер массива
 
 //Печать массива в консоль
 void PrintArrayToConsole(int[] printArray)
@@ -35,12 +35,10 @@ void CountingSortExtended(int[] inputArray)
     {
         for (int j = 0; j < counters[i]; j++)
         {
-            sortedArray[index] = i - offset;
+            inputArray[index] = i - offset;
             index++;
         }
     }
-
-    return sortedArray;
 }
 
 //Подготовка к параллельной сортировке
@@ -69,14 +67,22 @@ void PrepareParallelSorting(int[] inputArray)
     {
     	thread.Join();
     }
+
+    int index = 0;
+    for (int i = 0; i < counters.Length; i++)
+    {
+        for (int j = 0; j < counters[i]; j++)
+        {
+            inputArray[index] = i - offset;
+            index++;
+        }
+    }
 }
 
 
 //Сортировка несколькими потоками
 void ParallelSortExtended(int[] inputArray, int[] counters, int startPos, int endPos, int offset)
 {
-    int[] sortedArray = new int[endPos];
-
     for (int i = startPos; i < endPos; i++)
     {
         counters[inputArray[i] + offset]++;
